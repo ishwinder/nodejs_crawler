@@ -11,23 +11,30 @@ class Crawl {
     this.visitQ = []
   }
 
+  pageVisitedCallback({ page, found }) {
+    this.visitQ.pop(page)
+    this.visited.set(page, found)
+    if (this.visitQ.length == 0)
+      this.printStats()
+  }
+
   visitPages() {
     this.visitQ.forEach(function(page) {
-      this.visitQ.pop(page)
-      this.visitPage({ page })
+      this.visitPage({ page, callback: this.pageVisitedCallback.bind(this) })
     }, this)
   }
 
-  visitPage({ page }) {
+  visitPage({ page, callback }) {
     this.visited.set(page, false)
 
     request(page, function(_error, response, body) {
       if (response.statusCode === 200) {
         const parser = new Parser({ url: page, base_url: this.base_url, body})
+        let found = false
 
         if (parser.search(query)) {
-          if (this.visited)
-            this.visited.set(page, true)
+          found = true
+          callback( { page, found })
         }
       }
     })
@@ -63,7 +70,6 @@ class Crawl {
         }, this)
 
         this.visitPages()
-        this.printStats()
       }
     })
   }
