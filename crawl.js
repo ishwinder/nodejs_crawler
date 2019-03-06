@@ -14,6 +14,7 @@ class Crawl {
   pageVisitedCallback({ page, found }) {
     this.visitQ.pop(page)
     this.visited.set(page, found)
+
     if (this.visitQ.length == 0)
       this.printStats()
   }
@@ -34,8 +35,8 @@ class Crawl {
 
         if (parser.search(query)) {
           found = true
-          callback( { page, found })
         }
+        callback( { page, found })
       }
     })
   }
